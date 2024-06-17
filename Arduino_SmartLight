@@ -1,0 +1,102 @@
+
+#include <FastLED.h>
+#define ledPin      7          //attach pin 6 Arduino to digital pin of LED Panel
+#define NUM_LEDS    9          //number of LEDs in the panel
+#define BRIGHTNESS  255        //brightness of the LEDs, ranging from 0 - 255
+#define LED_TYPE    WS2811     //type of LED, we are using WS2811
+#define COLOR_ORDER GRB        //different type has different color order
+CRGB a = CRGB::Red;            //a variable type from "FastLED.h", it controls color of LED 
+CRGB b = CRGB::Blue;
+CRGB c = CRGB::Magenta;
+CRGB e = CRGB::Orange;
+CRGB f = CRGB::OrangeRed;
+CRGB g = CRGB::Gold;
+CRGB h = CRGB::Gray;
+CRGB i = CRGB::Green;
+CRGB ledA[NUM_LEDS];            //with a array, we are defining a variable for control of a string of LEDs
+CRGBPalette16 currentPalette;   //a variable type to save the pattern to be shown, the 16 means it is designed for 16 leds, we have 8, 16, 32, 64, 128, 256
+
+const int trigPin = 9;
+const int echoPin = 10;
+
+void setup() {
+  delay( 5000 );
+  FastLED.addLeds<LED_TYPE, ledPin, COLOR_ORDER>(ledA, NUM_LEDS);  //assign the LED to the pin 6 on Arduino, this function is designed to control multiple LED strip
+  FastLED.setBrightness( BRIGHTNESS );
+  pinMode(trigPin, OUTPUT);
+  pinMode(echoPin, INPUT);
+}
+
+void loop() {
+  int duration, distance;
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+  
+  duration = pulseIn(echoPin, HIGH);
+  distance = (duration/2)/29.1;
+
+  if(distance <= 10) {
+//    clearLeds();
+    writeRed();
+  }
+  else if(distance > 15&& distance <= 25) {
+//    clearLeds();
+    writeBlue();
+  }
+  else if(distance > 25 && distance <= 40) {
+//    clearLeds();
+    writeGreen();
+  }
+  else {
+    clearLeds();
+  }
+  
+}
+
+
+void writeRed(){
+  //First Color, RED
+  currentPalette = CRGBPalette16{a, a, a,              //edit the pattern to be shown on the panel first
+                                 a, a, a,
+                                 a, a, a,
+                                 g, g, g, g, g, g, g}; //the function needs 16 input but we just need 9, so we fill in 7 random values to fill it up 
+  for (int i = 0; i < NUM_LEDS; i++) {
+    ledA[i] = currentPalette[i];                       //we use a for loop to give command to LEDs one by one
+  }
+  FastLED.show();
+}
+
+
+void writeBlue(){
+   //Second Color, BLUE
+  currentPalette = CRGBPalette16{b, b, b,
+                                 b, b, b,
+                                 b, b, b,
+                                 g, g, g, g, g, g, g};
+  for (int i = 0; i < NUM_LEDS; i++) {
+    ledA[i] = currentPalette[i];
+  }
+  FastLED.show();
+}
+
+
+void writeGreen(){
+  //Third Color, GREEN
+  currentPalette = CRGBPalette16{i, i, i,
+                                 i, i, i,
+                                 i, i, i,
+                                 g, g, g, g, g, g, g};
+  for (int i = 0; i < NUM_LEDS; i++) {
+    ledA[i] = currentPalette[i];
+  }
+  FastLED.show();
+}
+
+
+void clearLeds() {                                     //a function for turning all LEDs to black and prepare for next pattern
+  for (int i = 0; i < NUM_LEDS; i++) {
+    ledA[i] = CRGB::Black;
+  }
+  FastLED.show();
+}
